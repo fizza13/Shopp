@@ -1,0 +1,328 @@
+/* ============================================================
+   MOBILE SHOP MANAGER - COMPLETE BACKEND (FINAL FIXED)
+   ============================================================ */
+
+/* =========================
+   ENTRY POINTS
+========================= */
+
+function doGet(e) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const tz = ss.getSpreadsheetTimeZone();
+
+  const inv = ss.getSheetByName("Inventory");
+  const sales = ss.getSheetByName("Sales");
+  const sup = ss.getSheetByName("Suppliers");
+  const profit = ensureProfitSheet_(ss);
+  const exp = ss.getSheetByName("Expense");
+  const acc = ss.getSheetByName("Accessories");
+
+  function formatRows(values) {
+    if (values.length <= 1) return [];
+
+    return values.slice(1).map(row =>
+      row.map(cell => {
+        if (cell instanceof Date) {
+          return Utilities.formatDate(cell, tz, "yyyy-MM-dd");
+        }
+        return cell;
+      })
+    );
+  }
+
+ const output = {
+ inventory:{startRow:2,rows:formatRows(inv.getDataRange().getValues())},
+ sales:{startRow:2,rows:formatRows(sales.getDataRange().getValues())},
+ suppliers:{startRow:2,rows:formatRows(sup.getDataRange().getValues())},
+ profit:{startRow:2,rows:formatRows(profit.getDataRange().getValues())},
+ expense:{startRow:2,rows:formatRows(exp.getDataRange().getValues())},
+ accessories:{startRow:2,rows:formatRows(acc.getDataRange().getValues())}
+};
+
+  return ContentService
+    .createTextOutput(JSON.stringify(output))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  const sheetName = e.parameter.sheet;
+  const action = e.parameter.action;
+  const payload = JSON.parse(e.postData.contents);
+
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ws = ss.getSheetByName(sheetName);
+
+  if (!ws) return jsonError_("Sheet not found: " + sheetName);
+
+  try {
+
+if (sheetName === "Sales")
+  return handleSales_(ss, ws, action, payload);
+
+if (sheetName === "Suppliers")
+  return handleSuppliers_(ss, ws, action, payload);
+
+// Expense handling
+if (sheetName === "Expense") {
+
+  if (action === "add")
+    ws.appendRow(payload);
+
+  if (action === "delete")
+    ws.deleteRow(Number(payload.row));
+
+  if (action === "update")
+    ws.getRange(Number(payload.row), 1, 1, payload.values.length)
+      .setValues([payload.values]);
+
+  return jsonOk_();
+}
+
+// Accessories handling
+if (sheetName === "Accessories") {
+
+  if (action === "add")
+    ws.appendRow(payload);
+
+  if (action === "delete")
+    ws.deleteRow(Number(payload.row));
+
+  if (action === "update")
+    ws.getRange(Number(payload.row), 1, 1, payload.values.length)
+      .setValues([payload.values]);
+
+  return jsonOk_();
+}
+
+// Inventory & other sheets (default)
+if (action === "add")
+  ws.appendRow(payload);
+
+if (action === "delete")
+  ws.deleteRow(Number(payload.row));
+
+if (action === "update")
+  ws.getRange(Number(payload.row), 1, 1, payload.values.length)
+    .setValues([payload.values]);
+
+return jsonOk_();
+
+  } catch (err) {
+    return jsonError_(String(err));
+  }
+}
+
+/* =========================
+   SALES LOGIC
+========================= */
+
+function handleSales_(ss, ws, action, payload) {
+
+  if (action === "add") {
+
+    const date = payload[0];
+    const customer = payload[1];
+    const phone = payload[2];
+    const itemName = payload[3];
+    const sell = Number(payload[4] || 0);
+    const extra = payload[5] || ""; // STRING
+
+    if (!itemName) return jsonError_("Item required");
+
+    const invInfo = getInventoryRowByName_(ss, itemName);
+    if (!invInfo) return jsonError_("Item not found");
+
+    const invPieces = Number(invInfo.values[3] || 0);
+    if (invPieces <= 0) return jsonError_("Out of stock");
+
+    // Reduce stock
+    setInventoryPieces_(invInfo.sheetRow, invPieces - 1, ss);
+
+    const buy = Number(invInfo.values[2] || 0);
+    const profit = sell - buy; // 🔥 Extra NOT included
+
+    ws.appendRow([
+      "'" + date,
+      customer,
+      phone,
+      itemName,
+      sell,
+      buy,
+      profit,
+      extra
+    ]);
+
+    recomputeDailyProfit_(ss);
+    return jsonOk_();
+  }
+
+  if (action === "delete") {
+    ws.deleteRow(Number(payload.row));
+    recomputeDailyProfit_(ss);
+    return jsonOk_();
+  }
+
+  if (action === "update") {
+
+    const row = Number(payload.row);
+    const values = payload.values;
+
+    const itemName = values[3];
+    const sell = Number(values[4] || 0);
+    const extra = values[5] || ""; // STRING
+
+    const invInfo = getInventoryRowByName_(ss, itemName);
+    if (!invInfo) return jsonError_("Item not found");
+
+    const buy = Number(invInfo.values[2] || 0);
+    const profit = sell - buy; // 🔥 Extra NOT included
+
+    ws.getRange(row, 1, 1, 8)
+      .setValues([[
+        "'" + values[0],
+        values[1],
+        values[2],
+        itemName,
+        sell,
+        buy,
+        profit,
+        extra
+      ]]);
+
+    recomputeDailyProfit_(ss);
+    return jsonOk_();
+  }
+
+  return jsonError_("Unknown action");
+}
+
+
+/* =========================
+   SUPPLIERS LOGIC (FIXED)
+========================= */
+
+function handleSuppliers_(ss, ws, action, payload) {
+
+  const inventorySheet = ss.getSheetByName("Inventory");
+
+  if (action === "add") {
+
+    // Always add supplier row
+    ws.appendRow(payload);
+
+    const supplierName = payload[1];
+    const productName = payload[3];
+    const specs = payload[4];
+    const pieces = Number(payload[5] || 0);
+    const singlePrice = Number(payload[6] || 0);
+
+    if (!productName) return jsonError_("Product name required");
+
+    // Always add a new inventory row.
+    // Same product name is allowed multiple times.
+    inventorySheet.appendRow([
+      productName,
+      specs,
+      singlePrice,
+      pieces,
+      supplierName
+    ]);
+
+    return jsonOk_();
+  }
+
+  if (action === "delete") {
+    ws.deleteRow(Number(payload.row));
+    return jsonOk_();
+  }
+
+  if (action === "update") {
+    ws.getRange(Number(payload.row), 1, 1, payload.values.length)
+      .setValues([payload.values]);
+
+    return jsonOk_();
+  }
+
+  return jsonError_("Unknown action");
+}
+
+/* =========================
+   PROFIT LOGIC
+========================= */
+
+function ensureProfitSheet_(ss) {
+  let sh = ss.getSheetByName("Profit");
+  if (!sh) {
+    sh = ss.insertSheet("Profit");
+    sh.appendRow(["Date", "Total Profit"]);
+  }
+  return sh;
+}
+
+function recomputeDailyProfit_(ss) {
+  const sales = ss.getSheetByName("Sales");
+  const profitSheet = ensureProfitSheet_(ss);
+
+  const values = sales.getDataRange().getValues();
+  const rows = values.length > 1 ? values.slice(1) : [];
+
+  const map = {};
+
+  rows.forEach(r => {
+    const dateStr = String(r[0] || "").replace("'", "").trim();
+    const p = Number(r[6] || 0);
+    if (!dateStr) return;
+    map[dateStr] = (map[dateStr] || 0) + p;
+  });
+
+  const dates = Object.keys(map).sort();
+  const out = dates.map(d => [d, map[d]]);
+
+  const last = profitSheet.getLastRow();
+  if (last > 1)
+    profitSheet.getRange(2, 1, last - 1, 2).clearContent();
+
+  if (out.length > 0)
+    profitSheet.getRange(2, 1, out.length, 2).setValues(out);
+}
+
+/* =========================
+   INVENTORY HELPERS
+========================= */
+
+function getInventoryRowByName_(ss, name) {
+  const inv = ss.getSheetByName("Inventory");
+  const data = inv.getDataRange().getValues();
+  const rows = data.length > 1 ? data.slice(1) : [];
+
+  for (let i = 0; i < rows.length; i++) {
+    if (
+  String(rows[i][0] || "").trim().toLowerCase() ===
+  String(name || "").trim().toLowerCase()
+) {
+      return { sheetRow: i + 2, values: rows[i] };
+    }
+  }
+  return null;
+}
+
+function setInventoryPieces_(sheetRow, newPieces, ss) {
+  const inv = ss.getSheetByName("Inventory");
+  inv.getRange(sheetRow, 4).setValue(newPieces);
+}
+
+/* =========================
+   JSON HELPERS
+========================= */
+
+function jsonOk_() {
+  return ContentService
+    .createTextOutput(JSON.stringify({ status: "success" }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function jsonError_(msg) {
+  return ContentService
+    .createTextOutput(JSON.stringify({ status: "error", message: msg }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
