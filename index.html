@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>Walk n Talk</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<script>
+if (localStorage.getItem("loggedIn") !== "true") {
+  window.location.href = "login.html";
+}
+function logout(){
+  localStorage.removeItem("loggedIn");
+  window.location.href="login.html";
+}
+</script>
+
+<header>
+  <h1>Walk n Talk</h1>
+  <button class="btn-danger" onclick="logout()">Logout</button>
+</header>
+
+<div id="message"></div>
+
+<nav class="tabs">
+  <button onclick="showTab('inventory')">Inventory</button>
+  <button onclick="showTab('sales')">Sales</button>
+  <button onclick="showTab('suppliers')">Suppliers</button>
+  <button onclick="showTab('profit')">Profit</button>
+  <button onclick="showTab('expense')">Expense</button>
+  <button onclick="showTab('accessories')">Accessories</button>
+</nav>
+
+<!-- INVENTORY -->
+<section id="inventory" class="tab">
+<div class="card inventory-card">
+
+<h2>Inventory</h2>
+
+<div class="inventory-summary">
+  <div>
+    <span>Total Phones / Tabs in Stock</span>
+    <strong id="inventoryTotalPieces">0</strong>
+  </div>
+</div>
+
+<div class="search-bar">
+  <input id="inventorySearch" placeholder="Search by Phone Name">
+  <button onclick="searchInventory()">Search</button>
+  <button onclick="clearInventorySearch()">Clear</button>
+</div>
+
+<div class="form-grid">
+<input id="invName" placeholder="Product Name">
+<input id="invSpecs" placeholder="Specs">
+<input id="invBuy" type="number" placeholder="Single Price">
+<input id="invPieces" type="number" placeholder="Pieces">
+<input id="invBuyer" placeholder="Buyer Phone/Name">
+<button onclick="submitInventory()">Save</button>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Specs</th>
+<th>Price</th>
+<th>Pieces</th>
+<th>Buyer</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="inventoryTable"></tbody>
+</table>
+</div>
+</section>
+
+<!-- SALES -->
+<section id="sales" class="tab hidden">
+<div class="card">
+<h2>Sales</h2>
+
+<div class="form-grid">
+<input id="saleDate" type="date">
+<input id="custName" placeholder="Customer Name">
+<input id="custPhone" placeholder="Phone No">
+<select id="saleItem"></select>
+<input id="sellPrice" type="number" placeholder="Sell Price">
+<input id="saleExtra" placeholder="Extra">
+<button onclick="submitSale()">Save</button>
+</div>
+
+<div class="search-bar">
+
+<input type="date" id="salesDate">
+<button onclick="filterSales()">Daily</button>
+
+<input type="month" id="salesMonth">
+<button onclick="filterSalesMonth()">Monthly</button>
+
+<button onclick="clearSalesFilter()">Clear</button>
+
+</div>
+
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Customer</th>
+<th>Phone</th>
+<th>Item</th>
+<th>Sell</th>
+<th>Buy</th>
+<th>Profit</th>
+<th>Action</th>
+<th>Extra</th>
+</tr>
+</thead>
+<tbody id="salesTable"></tbody>
+</table>
+</div>
+</section>
+
+<!-- SUPPLIERS -->
+
+<section id="suppliers" class="tab hidden">
+  <div class="card suppliers-card">
+
+    <div class="section-header">
+      <div>
+        <h2>Suppliers</h2>
+        <p class="muted">Add supplier purchases, track paid amount, and see remaining balance.</p>
+      </div>
+    </div>
+
+    <!-- Summary -->
+<div class="supplier-balance-checker">
+  <div class="supplier-picker">
+    <label>Supplier Name</label>
+    <input 
+      id="supplierBalanceName" 
+      list="supplierNamesList"
+      placeholder="Type or select supplier name..."
+      oninput="renderSupplierBalance()"
+    >
+
+    <datalist id="supplierNamesList"></datalist>
+  </div>
+
+  <div class="supplier-balance-result">
+    <span>Amount Left To Be Paid</span>
+    <strong id="selectedSupplierLeft">0</strong>
+  </div>
+</div>
+
+    <!-- Add / Edit Form -->
+    <div class="supplier-form-box">
+      <h3 id="supplierFormTitle">Add Supplier Purchase</h3>
+
+      <div class="form-grid supplier-form-grid">
+        <input type="date" id="supDate">
+        <input id="supName" placeholder="Supplier Name">
+        <input id="supPhone" placeholder="Phone Number">
+
+        <input id="supProduct" placeholder="Product Name">
+        <input id="supSpecs" placeholder="Specs / Model">
+
+        <input id="supPieces" type="number" placeholder="Pieces" oninput="autoCalculateTotal()">
+        <input id="supSinglePrice" type="number" placeholder="Single Price" oninput="autoCalculateTotal()">
+        <input id="supTotal" type="number" placeholder="Total Amount" readonly>
+        <input id="supPaid" type="number" placeholder="Paid Amount">
+      </div>
+
+      <div class="form-actions">
+        <button onclick="submitSupplier()" id="supplierSaveBtn">Save Supplier</button>
+        <button type="button" class="btn-light" onclick="clearSupplierForm()">Clear Form</button>
+      </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="toolbar">
+      <input id="supplierSearch" placeholder="Search supplier, phone, product..." oninput="searchSupplier()">
+
+      <input type="date" id="supplierDate" onchange="filterSupplier()">
+      <input type="month" id="supplierMonth" onchange="filterSupplierMonth()">
+
+      <button class="btn-light" onclick="clearSupplierFilter()">Clear Filters</button>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Supplier</th>
+            <th>Phone</th>
+            <th>Product</th>
+            <th>Specs</th>
+            <th>Pieces</th>
+            <th>Single</th>
+            <th>Total</th>
+            <th>Paid</th>
+            <th>Left</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="suppliersTable"></tbody>
+      </table>
+    </div>
+
+  </div>
+</section>
+
+<!-- PROFIT -->
+<section id="profit" class="tab hidden">
+<div class="card">
+<h2>Profit Per Day</h2>
+
+<div class="search-bar">
+<input type="date" id="profitDate">
+<button onclick="filterProfit()">Daily</button>
+
+<input type="month" id="profitMonth">
+<button onclick="filterProfitMonth()">Monthly</button>
+
+<button onclick="clearProfitFilter()">Clear</button>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Total Profit</th>
+</tr>
+</thead>
+<tbody id="profitTable"></tbody>
+</table>
+
+</div>
+</section>
+
+<!-- EXPENSE -->
+<section id="expense" class="tab hidden">
+<div class="card">
+
+<h2>Expenses</h2>
+
+<div class="form-grid">
+<input type="date" id="expDate">
+<input id="expDesc" placeholder="Expense Description">
+<input type="number" id="expAmount" placeholder="Amount">
+<button onclick="submitExpense()">Save</button>
+</div>
+
+<h3>Filter Expense</h3>
+
+<div class="search-bar">
+<input type="date" id="expenseDate">
+<button onclick="filterExpense()">Daily</button>
+
+<input type="month" id="expenseMonth">
+<button onclick="filterExpenseMonth()">Monthly</button>
+
+<button onclick="clearExpenseFilter()">Clear</button>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Description</th>
+<th>Amount</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="expenseTable"></tbody>
+
+</table>
+
+</div>
+</section>
+
+<!-- ACCESSORIES -->
+<section id="accessories" class="tab hidden">
+<div class="card">
+
+<h2>Accessories</h2>
+
+<div class="form-grid">
+<input type="date" id="accDate">
+<input id="accType" placeholder="Accessory Type">
+<input type="number" id="accAmount" placeholder="Amount">
+<button onclick="submitAccessory()">Save</button>
+</div>
+
+<div class="search-bar">
+<input type="date" id="accessoryDate">
+<button onclick="filterAccessory()">Filter</button>
+<button onclick="clearAccessoryFilter()">Clear</button>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Type</th>
+<th>Amount</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="accessoriesTable"></tbody>
+</table>
+
+</div>
+</section>
+<script src="app.js"></script>
+</body>
+</html>

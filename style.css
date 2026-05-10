@@ -1,0 +1,296 @@
+body{font-family:'Segoe UI',sans-serif;background:#eef2f7;margin:0;}
+
+header{
+background:#1f2937;
+color:white;
+padding:18px 30px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.tabs{text-align:center;margin:20px 0;}
+
+.tabs button{
+padding:10px 18px;
+margin:5px;
+border:none;
+border-radius:6px;
+background:#2563eb;
+color:white;
+cursor:pointer;
+font-weight:500;
+}
+
+.tabs button:hover{background:#1e40af;}
+
+.card{
+background:white;
+margin:20px;
+padding:25px;
+border-radius:12px;
+box-shadow:0 8px 25px rgba(0,0,0,0.08);
+}
+
+.form-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
+gap:12px;
+margin-bottom:20px;
+}
+
+input,select{
+padding:9px;
+border-radius:6px;
+border:1px solid #d1d5db;
+}
+
+button{
+padding:9px 14px;
+border:none;
+border-radius:6px;
+background:#10b981;
+color:white;
+cursor:pointer;
+font-weight:500;
+}
+
+button:hover{opacity:0.9;}
+
+.btn-danger{background:#ef4444;}
+
+table{width:100%;border-collapse:collapse;margin-top:10px;}
+
+th{background:#111827;color:white;padding:12px;}
+
+td{
+padding:10px;
+border-bottom:1px solid #e5e7eb;
+text-align:center;
+}
+
+.highlight{
+  background-color:#d1a413 !important;
+  font-weight:600;
+}
+
+tr.highlight{background:#fef9c3 !important;font-weight:600;}
+
+.search-bar{display:flex;gap:10px;margin-bottom:15px;}
+
+.hidden{display:none;}
+
+#message{text-align:center;font-weight:600;margin:10px;}
+
+.out-of-stock{
+  background-color:#fee2e2 !important;
+  color:#b91c1c;
+  font-weight:600;
+}
+
+/* ================= SUPPLIERS IMPROVED UI ================= */
+
+.suppliers-card {
+  max-width: 1200px;
+  margin: 20px auto;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.section-header h2 {
+  margin: 0;
+  color: #111827;
+}
+
+.muted {
+  margin: 5px 0 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.supplier-balance-checker {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 16px;
+  align-items: end;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 18px;
+  margin: 18px 0 22px;
+}
+
+.supplier-picker label {
+  display: block;
+  font-size: 13px;
+  color: #374151;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.supplier-picker input {
+  width: 100%;
+  box-sizing: border-box;
+  height: 42px;
+  font-size: 15px;
+  background: white;
+}
+
+.supplier-balance-result {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.supplier-balance-result span {
+  display: block;
+  font-size: 13px;
+  color: #9a3412;
+  margin-bottom: 6px;
+}
+
+.supplier-balance-result strong {
+  display: block;
+  font-size: 26px;
+  color: #c2410c;
+}
+
+@media (max-width: 700px) {
+  .supplier-balance-checker {
+    grid-template-columns: 1fr;
+  }
+}
+
+.summary-box span {
+  display: block;
+  color: #6b7280;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.summary-box strong {
+  font-size: 24px;
+  color: #111827;
+}
+
+.summary-box.warning {
+  background: #fff7ed;
+  border-color: #fed7aa;
+}
+
+
+
+.supplier-form-box {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 20px;
+}
+
+.supplier-form-box h3 {
+  margin: 0 0 15px;
+  color: #111827;
+}
+
+.supplier-form-grid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.btn-light {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.toolbar {
+  display: grid;
+  grid-template-columns: 1fr 160px 160px auto;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.suppliers-card table {
+  min-width: 950px;
+}
+
+.suppliers-card td,
+.suppliers-card th {
+  white-space: nowrap;
+}
+
+.balance-left {
+  color: #b91c1c;
+  font-weight: 700;
+}
+
+.balance-clear {
+  color: #047857;
+  font-weight: 700;
+}
+
+@media (max-width: 760px) {
+  .toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions button {
+    width: 100%;
+  }
+
+  .section-header {
+    align-items: flex-start;
+  }
+}
+.inventory-summary {
+  display: flex;
+  justify-content: flex-start;
+  margin: 18px 0;
+}
+
+.inventory-summary > div {
+  min-width: 280px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 14px;
+  padding: 18px 22px;
+}
+
+.inventory-summary span {
+  display: block;
+  font-size: 14px;
+  color: #166534;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.inventory-summary strong {
+  display: block;
+  font-size: 32px;
+  color: #15803d;
+  font-weight: 800;
+}
+
+@media (max-width: 700px) {
+  .inventory-summary > div {
+    width: 100%;
+    min-width: unset;
+  }
+}
