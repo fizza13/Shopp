@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbzX3x9FfllQBjCwI4nHipFXeayHQk35sKDJCq6RGnOlD9Is8WzXWzpYgOKIKq_jLe6Atg/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxUy35ZdvecwKK51xpPZLMAShnoeGBEFzdDrtZhHwceoccsxOBxvFDk-w1Pbe1fn86J/exec";
 
 let inventoryData=[],salesData=[],suppliersData=[],profitData=[];
 let editInventoryRow=null,editSupplierRow=null,editSaleRow=null;
