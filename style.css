@@ -294,3 +294,20 @@ tr.highlight{background:#fef9c3 !important;font-weight:600;}
     min-width: unset;
   }
 }
+.inventory-summary {
+  display: flex;
+  justify-content: flex-start;
+  gap: 18px;
+  margin: 18px 0;
+}
+
+@media (max-width: 700px) {
+  .inventory-summary {
+    flex-direction: column;
+  }
+
+  .inventory-summary > div {
+    width: 100%;
+    min-width: unset;
+  }
+}
