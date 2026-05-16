@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbwXk1AMNTJnAo_IzNtkvmeBmg1ScSnZXwTsAZuRJwKsO6GtiycFuaQHyyrQsLxxxfLc/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzX3x9FfllQBjCwI4nHipFXeayHQk35sKDJCq6RGnOlD9Is8WzXWzpYgOKIKq_jLe6Atg/exec";
 
 let inventoryData=[],salesData=[],suppliersData=[],profitData=[];
 let editInventoryRow=null,editSupplierRow=null,editSaleRow=null;
@@ -135,9 +135,10 @@ function submitInventory(){
 
 function renderInventory(data=null,highlight=false){
  const list = data || inventoryData;
-$("inventoryTable").innerHTML="";
+ $("inventoryTable").innerHTML="";
 
-let totalPieces = 0;
+ let totalPieces = 0;
+ let totalValue = 0;
 
  if(list.length===0){
    $("inventoryTable").innerHTML =
@@ -147,10 +148,18 @@ let totalPieces = 0;
 
  list.forEach(i=>{
   const r=i.values;
-  totalPieces += Number(r[3] || 0);
+
+  const singlePrice = Number(r[2] || 0);
   const pieces = Number(r[3] || 0);
 
-  // 🔥 If pieces = 0 → highlight red
+  totalPieces += pieces;
+
+  // price is single price, so multiply by pieces
+  // if pieces is 0, it adds nothing
+  if(pieces > 0){
+    totalValue += singlePrice * pieces;
+  }
+
   let rowClass = "";
   if(pieces === 0){
     rowClass = "out-of-stock";
@@ -168,14 +177,19 @@ let totalPieces = 0;
    <td>${r[4]}</td>
    <td>
     <button onclick="startInventoryEdit(${i.sheetRow})">Edit</button>
- <button class="btn-danger"
- onclick="confirmDelete('Inventory', ${i.sheetRow})">Delete</button>
+    <button class="btn-danger"
+      onclick="confirmDelete('Inventory', ${i.sheetRow})">Delete</button>
    </td>
   </tr>`;
  });
-if($("inventoryTotalPieces")){
+
+ if($("inventoryTotalPieces")){
   $("inventoryTotalPieces").innerText = totalPieces;
-}
+ }
+
+ if($("inventoryTotalValue")){
+  $("inventoryTotalValue").innerText = totalValue;
+ }
 }
 
 function searchInventory(){
