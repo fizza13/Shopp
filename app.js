@@ -256,68 +256,76 @@ function submitSale(){
  clearSaleForm();
 }
 
-function renderSales(){
+function renderSales() {
+  const table = $("salesTable");
+  table.innerHTML = "";
 
-  $("salesTable").innerHTML = "";
+  let filteredSales = salesData;
 
-  let rows = salesData.map(s => s.values);
-
-  if(selectedSalesDate){
-    rows = rows.filter(r =>
-      safeDate(r[0]) === selectedSalesDate
+  // Daily filter
+  if (selectedSalesDate) {
+    filteredSales = filteredSales.filter(s =>
+      safeDate(s.values[0]) === selectedSalesDate
     );
   }
 
-  if(selectedSalesMonth){
-    rows = rows.filter(r =>
-      safeDate(r[0]).startsWith(selectedSalesMonth)
+  // Monthly filter
+  if (selectedSalesMonth) {
+    filteredSales = filteredSales.filter(s =>
+      safeDate(s.values[0]).startsWith(selectedSalesMonth)
     );
   }
 
-  let totalSell = 0;
-  let totalProfit = 0;
+  let totalCash = 0;
 
-  rows.forEach(r => {
-
-    totalSell += Number(r[4] || 0);
-    totalProfit += Number(r[6] || 0);
-
-    const item = salesData.find(s => s.values === r);
-
-    $("salesTable").innerHTML += `
-      <tr>
-        <td>${safeDate(r[0])}</td>
-        <td>${r[1]}</td>
-        <td>${r[2]}</td>
-        <td>${r[3]}</td>
-        <td>${r[4]}</td>
-        <td>${r[5]}</td>
-        <td>${r[6]}</td>
-        <td>${r[7] || "-"}</td>
-        <td>
-          <button onclick="startSaleEdit(${item.sheetRow})">Edit</button>
-          <button
-            class="btn-danger"
-            onclick="confirmDelete('Sales', ${item.sheetRow})"
-          >
-            Delete
-          </button>
-        </td>
-      </tr>`;
-  });
-
-  // Total cash = Sell + Profit
-  const totalCash = totalSell + totalProfit;
-
-  $("salesTotalCash").innerText = totalCash.toLocaleString();
-
-  if(rows.length === 0){
-    $("salesTable").innerHTML = `
+  if (filteredSales.length === 0) {
+    table.innerHTML = `
       <tr>
         <td colspan="9">No sales found</td>
       </tr>
     `;
+
+    $("salesTotalCash").innerText = "0";
+    return;
   }
+
+  filteredSales.forEach(sale => {
+    const r = sale.values;
+
+    // Sell column is index 4.
+    // Remove commas or other non-numeric characters before conversion.
+    const sellAmount =
+      parseFloat(String(r[4] || 0).replace(/[^0-9.-]/g, "")) || 0;
+
+    totalCash += sellAmount;
+
+    table.innerHTML += `
+      <tr>
+        <td>${safeDate(r[0])}</td>
+        <td>${r[1] || "-"}</td>
+        <td>${r[2] || "-"}</td>
+        <td>${r[3] || "-"}</td>
+        <td>${r[4] || 0}</td>
+        <td>${r[5] || 0}</td>
+        <td>${r[6] || 0}</td>
+        <td>${r[7] || "-"}</td>
+        <td>
+          <button onclick="startSaleEdit(${sale.sheetRow})">
+            Edit
+          </button>
+
+          <button
+            class="btn-danger"
+            onclick="confirmDelete('Sales', ${sale.sheetRow})">
+            Delete
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+
+  // This must be after filteredSales.forEach().
+  $("salesTotalCash").innerText = totalCash.toLocaleString();
 }
 
 function startSaleEdit(row){
