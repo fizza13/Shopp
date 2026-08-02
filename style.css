@@ -311,3 +311,12 @@ tr.highlight{background:#fef9c3 !important;font-weight:600;}
     min-width: unset;
   }
 }
+.accessories-total-row {
+  background: #f3f4f6;
+  font-size: 17px;
+}
+
+.accessories-total-row td {
+  border-top: 2px solid #111827;
+  padding: 15px;
+}
