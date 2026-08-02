@@ -98,14 +98,21 @@ function logout(){
 </div>
 
 <div class="search-bar">
+  <input type="date" id="salesDate">
+  <button onclick="filterSales()">Daily</button>
 
-<input type="date" id="salesDate">
-<button onclick="filterSales()">Daily</button>
+  <input type="month" id="salesMonth">
+  <button onclick="filterSalesMonth()">Monthly</button>
 
-<input type="month" id="salesMonth">
-<button onclick="filterSalesMonth()">Monthly</button>
+  <button onclick="clearSalesFilter()">Clear</button>
+</div>
 
-<button onclick="clearSalesFilter()">Clear</button>
+<div class="sales-total-summary">
+  <span>Total Cash:</span>
+  <strong id="salesTotalCash">0</strong>
+</div>
+
+<table>
 
 
 <table>
