@@ -259,23 +259,19 @@ function renderSales() {
   const table = $("salesTable");
   table.innerHTML = "";
 
-  let filteredSales = salesData;
+  let filteredSales = [...salesData];
 
-  // Daily filter
   if (selectedSalesDate) {
     filteredSales = filteredSales.filter(s =>
       safeDate(s.values[0]) === selectedSalesDate
     );
   }
 
-  // Monthly filter
   if (selectedSalesMonth) {
     filteredSales = filteredSales.filter(s =>
       safeDate(s.values[0]).startsWith(selectedSalesMonth)
     );
   }
-
-  let totalCash = 0;
 
   if (filteredSales.length === 0) {
     table.innerHTML = `
@@ -283,20 +279,18 @@ function renderSales() {
         <td colspan="9">No sales found</td>
       </tr>
     `;
-
-    $("salesTotalCash").innerText = "0";
     return;
   }
+
+  let totalSell = 0;
 
   filteredSales.forEach(sale => {
     const r = sale.values;
 
-    // Sell column is index 4.
-    // Remove commas or other non-numeric characters before conversion.
     const sellAmount =
-      parseFloat(String(r[4] || 0).replace(/[^0-9.-]/g, "")) || 0;
+      Number(String(r[4] || 0).replace(/,/g, "")) || 0;
 
-    totalCash += sellAmount;
+    totalSell += sellAmount;
 
     table.innerHTML += `
       <tr>
@@ -304,9 +298,9 @@ function renderSales() {
         <td>${r[1] || "-"}</td>
         <td>${r[2] || "-"}</td>
         <td>${r[3] || "-"}</td>
-        <td>${r[4] || 0}</td>
-        <td>${r[5] || 0}</td>
-        <td>${r[6] || 0}</td>
+        <td>${sellAmount.toLocaleString()}</td>
+        <td>${Number(r[5] || 0).toLocaleString()}</td>
+        <td>${Number(r[6] || 0).toLocaleString()}</td>
         <td>${r[7] || "-"}</td>
         <td>
           <button onclick="startSaleEdit(${sale.sheetRow})">
@@ -323,8 +317,13 @@ function renderSales() {
     `;
   });
 
-  // This must be after filteredSales.forEach().
-  $("salesTotalCash").innerText = totalCash.toLocaleString();
+  table.innerHTML += `
+    <tr class="sales-total-row">
+      <td colspan="4"><strong>Total Sell</strong></td>
+      <td><strong>${totalSell.toLocaleString()}</strong></td>
+      <td colspan="4"></td>
+    </tr>
+  `;
 }
 
 function startSaleEdit(row){
