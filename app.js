@@ -818,37 +818,66 @@ function clearAccessoryForm(){
  $("accType").value = "";
  $("accAmount").value = "";
 }
+function renderAccessories() {
+  const table = $("accessoriesTable");
+  table.innerHTML = "";
 
-function renderAccessories(){
- $("accessoriesTable").innerHTML = "";
+  let list = [...accessoriesData];
 
- let list = accessoriesData;
+  if (selectedAccessoryDate) {
+    list = list.filter(a =>
+      safeDate(a.values[0]) === selectedAccessoryDate
+    );
+  }
 
- if(selectedAccessoryDate)
-  list = list.filter(a => safeDate(a.values[0]) === selectedAccessoryDate);
+  if (list.length === 0) {
+    table.innerHTML = `
+      <tr>
+        <td colspan="4">No accessory data found</td>
+      </tr>
+    `;
+    return;
+  }
 
- if(list.length === 0){
-  $("accessoriesTable").innerHTML =
-   `<tr><td colspan="4">No data</td></tr>`;
-  return;
- }
+  let totalAmount = 0;
 
- list.forEach(a => {
-  const r = a.values;
+  list.forEach(accessory => {
+    const r = accessory.values;
 
-  $("accessoriesTable").innerHTML += `
-  <tr>
-   <td>${safeDate(r[0])}</td>
-   <td>${r[1]}</td>
-   <td>${r[2]}</td>
-   <td>
-    <button onclick="startAccessoryEdit(${a.sheetRow})">Edit</button>
-  <button class="btn-danger"
- onclick="confirmDelete('Accessories', ${a.sheetRow})">Delete</button>
-   </td>
-  </tr>`;
- });
+    const amount =
+      Number(String(r[2] || 0).replace(/,/g, "")) || 0;
+
+    totalAmount += amount;
+
+    table.innerHTML += `
+      <tr>
+        <td>${safeDate(r[0])}</td>
+        <td>${r[1] || "-"}</td>
+        <td>${amount.toLocaleString()}</td>
+        <td>
+          <button onclick="startAccessoryEdit(${accessory.sheetRow})">
+            Edit
+          </button>
+
+          <button
+            class="btn-danger"
+            onclick="confirmDelete('Accessories', ${accessory.sheetRow})">
+            Delete
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+
+  table.innerHTML += `
+    <tr class="accessories-total-row">
+      <td colspan="2"><strong>Total Amount</strong></td>
+      <td><strong>${totalAmount.toLocaleString()}</strong></td>
+      <td></td>
+    </tr>
+  `;
 }
+
 
 function startAccessoryEdit(row){
  const item = accessoriesData.find(i => i.sheetRow === row);
