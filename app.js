@@ -258,38 +258,66 @@ function submitSale(){
 
 function renderSales(){
 
- $("salesTable").innerHTML="";
+  $("salesTable").innerHTML = "";
 
- let rows=salesData.map(s=>s.values);
+  let rows = salesData.map(s => s.values);
 
- if(selectedSalesDate)
-  rows=rows.filter(r=>safeDate(r[0])===selectedSalesDate);
+  if(selectedSalesDate){
+    rows = rows.filter(r =>
+      safeDate(r[0]) === selectedSalesDate
+    );
+  }
 
- if(selectedSalesMonth)
-  rows=rows.filter(r=>safeDate(r[0]).startsWith(selectedSalesMonth));
+  if(selectedSalesMonth){
+    rows = rows.filter(r =>
+      safeDate(r[0]).startsWith(selectedSalesMonth)
+    );
+  }
 
- rows.forEach(r=>{
+  let totalSell = 0;
+  let totalProfit = 0;
 
-  const item=salesData.find(s=>s.values===r);
+  rows.forEach(r => {
 
-  $("salesTable").innerHTML+=`
-  <tr>
-   <td>${safeDate(r[0])}</td>
-   <td>${r[1]}</td>
-   <td>${r[2]}</td>
-   <td>${r[3]}</td>
-   <td>${r[4]}</td>
-   <td>${r[5]}</td>
-   <td>${r[6]}</td>
-   <td>${r[7]}</td>
-   <td>
-    <button onclick="startSaleEdit(${item.sheetRow})">Edit</button>
-   <button class="btn-danger"
- onclick="confirmDelete('Sales', ${item.sheetRow})">Delete</button>
-   </td>
-  </tr>`;
- });
+    totalSell += Number(r[4] || 0);
+    totalProfit += Number(r[6] || 0);
 
+    const item = salesData.find(s => s.values === r);
+
+    $("salesTable").innerHTML += `
+      <tr>
+        <td>${safeDate(r[0])}</td>
+        <td>${r[1]}</td>
+        <td>${r[2]}</td>
+        <td>${r[3]}</td>
+        <td>${r[4]}</td>
+        <td>${r[5]}</td>
+        <td>${r[6]}</td>
+        <td>${r[7] || "-"}</td>
+        <td>
+          <button onclick="startSaleEdit(${item.sheetRow})">Edit</button>
+          <button
+            class="btn-danger"
+            onclick="confirmDelete('Sales', ${item.sheetRow})"
+          >
+            Delete
+          </button>
+        </td>
+      </tr>`;
+  });
+
+  // Total cash = Sell + Profit
+  const totalCash = totalSell + totalProfit;
+
+  $("salesTotalCash").innerText = totalCash.toLocaleString();
+
+  if(rows.length === 0){
+    $("salesTable").innerHTML = `
+      <tr>
+        <td colspan="9">No sales found</td>
+      </tr>
+    `;
+  }
 }
 
 function startSaleEdit(row){
