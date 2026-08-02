@@ -9,7 +9,6 @@ let accessoriesData=[];
 let selectedAccessoryDate="";
 let selectedSalesDate="";
 let selectedSalesMonth="";
-let rows=salesData.map(s=>s.values);
 let selectedSupplierDate="";
 let selectedSupplierMonth="";
 let editExpenseRow = null;
@@ -355,6 +354,9 @@ function loadInventoryList(){
 function filterSales(){
  selectedSalesMonth="";
  selectedSalesDate=$("salesDate").value;
+  if (!selectedSalesDate) {
+    return showMessage("Select a date first", "red");
+  }
  renderSales();
 }
 
