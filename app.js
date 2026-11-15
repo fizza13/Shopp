@@ -347,20 +347,34 @@ function clearSaleForm(){
 }
 
 function loadInventoryList() {
-  $("saleItem").innerHTML = "";
+  const select = document.getElementById("saleItem");
 
-  inventoryData
-    .filter(i => Number(i.values[3]) > 0)
-    .sort((a, b) =>
-      String(a.values[0]).localeCompare(
-        String(b.values[0]),
-        undefined,
-        { numeric: true, sensitivity: "base" }
-      )
-    )
-    .forEach(i => {
-      $("saleItem").innerHTML += `<option>${i.values[0]}</option>`;
+  if (!select) return;
+
+  select.innerHTML = "";
+
+  // Get phones that are currently in stock
+  const availablePhones = inventoryData
+    .filter(i => Number(i.values[3]) > 0);
+
+  // Sort phones alphabetically from A to Z
+  availablePhones.sort((a, b) => {
+    const nameA = String(a.values[0] || "");
+    const nameB = String(b.values[0] || "");
+
+    return nameA.localeCompare(nameB, undefined, {
+      numeric: true,
+      sensitivity: "base"
     });
+  });
+
+  // Add sorted phones to dropdown
+  availablePhones.forEach(i => {
+    const option = document.createElement("option");
+    option.value = i.values[0];
+    option.textContent = i.values[0];
+    select.appendChild(option);
+  });
 }
 
 function filterSales(){
