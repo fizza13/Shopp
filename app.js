@@ -32,10 +32,13 @@ function confirmDelete(sheet, row){
  }
 }
 
-function showTab(id){
- document.querySelectorAll(".tab").forEach(t=>t.classList.add("hidden"));
- $(id).classList.remove("hidden");
- if(id==="sales") entoryList();
+function showTab(id) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.add("hidden"));
+  $(id).classList.remove("hidden");
+
+  if (id === "sales") {
+    loadInventoryList();
+  }
 }
 
 /* ================= NORMALIZE (SEARCH FIX) ================= */
