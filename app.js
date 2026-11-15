@@ -35,7 +35,7 @@ function confirmDelete(sheet, row){
 function showTab(id){
  document.querySelectorAll(".tab").forEach(t=>t.classList.add("hidden"));
  $(id).classList.remove("hidden");
- if(id==="sales") loadInventoryList();
+ if(id==="sales") entoryList();
 }
 
 /* ================= NORMALIZE (SEARCH FIX) ================= */
@@ -346,10 +346,21 @@ function clearSaleForm(){
  $("saleExtra").value="";
 }
 
-function loadInventoryList(){
- $("saleItem").innerHTML="";
- inventoryData.filter(i=>i.values[3]>0)
-  .forEach(i=>$("saleItem").innerHTML+=`<option>${i.values[0]}</option>`);
+function loadInventoryList() {
+  $("saleItem").innerHTML = "";
+
+  inventoryData
+    .filter(i => Number(i.values[3]) > 0)
+    .sort((a, b) =>
+      String(a.values[0]).localeCompare(
+        String(b.values[0]),
+        undefined,
+        { numeric: true, sensitivity: "base" }
+      )
+    )
+    .forEach(i => {
+      $("saleItem").innerHTML += `<option>${i.values[0]}</option>`;
+    });
 }
 
 function filterSales(){
