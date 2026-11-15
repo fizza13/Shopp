@@ -73,12 +73,14 @@ async function fetchAllData(){
 }
 
 function renderAll(){
- renderInventory();
- renderSales();
- renderSuppliers();
- renderProfit();
- renderExpense();
- renderAccessories();
+  renderInventory();
+  renderSales();
+  renderSuppliers();
+  renderProfit();
+  renderExpense();
+  renderAccessories();
+
+  loadInventoryList();
 }
 
 async function send(sheet,action,payload){
